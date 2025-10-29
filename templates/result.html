@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REVA AI - Analysis Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e7e34 100%);
+            min-height: 100vh;
+            padding: 20px;
+            animation: backgroundShift 10s infinite alternate;
+        }
+
+        @keyframes backgroundShift {
+            0% { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e7e34 100%); }
+            100% { background: linear-gradient(135deg, #2a5298 0%, #1e7e34 50%, #28a745 100%); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .error-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-card h2 {
+            color: #dc3545;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+        .card:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .success-icon { background: linear-gradient(135deg, #28a745, #20c997); }
+        .warning-icon { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+        .info-icon { background: linear-gradient(135deg, #17a2b8, #6f42c1); }
+        .time-icon { background: linear-gradient(135deg, #6610f2, #6f42c1); }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .card-content {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            color: #155724;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 4px;
+            border: 1px solid #c3e6cb;
+            transition: all 0.3s ease;
+            animation: popIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .missing-skill {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+
+        .skill-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .skill-hours-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .skill-hours-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            animation: slideInRight 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .skill-hours-list li:nth-child(odd) { animation-delay: 0.1s; }
+        .skill-hours-list li:nth-child(even) { animation-delay: 0.2s; }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .skill-hours-list li:hover {
+            background: #f8f9fa;
+            padding-left: 10px;
+            border-radius: 8px;
+        }
+
+        .skill-hours-list li:last-child {
+            border-bottom: none;
+        }
+
+        .hours-badge {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .unknown-hours {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        .time-summary {
+            text-align: center;
+            background: linear-gradient(135deg, #6f42c1, #6610f2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(111, 66, 193, 0.5); }
+            to { box-shadow: 0 0 40px rgba(111, 66, 193, 0.8); }
+        }
+
+        .time-number {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .course-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .course-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #28a745;
+            animation: slideInLeft 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .course-item:nth-child(1) { animation-delay: 0.1s; }
+        .course-item:nth-child(2) { animation-delay: 0.2s; }
+        .course-item:nth-child(3) { animation-delay: 0.3s; }
+        .course-item:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .course-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            background: white;
+        }
+
+        .course-title {
+            font-weight: 700;
+            color: #2d3748;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .course-title:hover {
+            color: #28a745;
+        }
+
+        .course-meta {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .course-skills {
+            font-size: 0.85rem;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .rating {
+            color: #ffc107;
+            margin-left: 5px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+            animation: slideUp 1s ease-out 1s both;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .back-button i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .floating-element:nth-child(1) { left: 10%; animation-delay: 0s; font-size: 2rem; }
+        .floating-element:nth-child(2) { left: 20%; animation-delay: 3s; font-size: 1.5rem; }
+        .floating-element:nth-child(3) { left: 30%; animation-delay: 6s; font-size: 2.5rem; }
+        .floating-element:nth-child(4) { left: 40%; animation-delay: 9s; font-size: 1.8rem; }
+        .floating-element:nth-child(5) { left: 50%; animation-delay: 12s; font-size: 2.2rem; }
+        .floating-element:nth-child(6) { left: 60%; animation-delay: 15s; font-size: 1.6rem; }
+        .floating-element:nth-child(7) { left: 70%; animation-delay: 18s; font-size: 2rem; }
+        .floating-element:nth-child(8) { left: 80%; animation-delay: 21s; font-size: 1.7rem; }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .time-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 4px;
+            animation: progressFill 2s ease-out forwards;
+            width: 0;
+        }
+
+        @keyframes progressFill {
+            to { width: var(--progress); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <i class="fas fa-brain floating-element"></i>
+        <i class="fas fa-graduation-cap floating-element"></i>
+        <i class="fas fa-laptop-code floating-element"></i>
+        <i class="fas fa-chart-line floating-element"></i>
+        <i class="fas fa-lightbulb floating-element"></i>
+        <i class="fas fa-cogs floating-element"></i>
+        <i class="fas fa-rocket floating-element"></i>
+        <i class="fas fa-target floating-element"></i>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h1>REVA AI</h1>
+            <p class="subtitle">Your Personalized Gap Analysis Results</p>
+        </div>
+
+        {% if error %}
+            <div class="error-card">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 20px;"></i>
+                <h2>{{ error }}</h2>
+                <a href="/" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Try Again
+                </a>
+            </div>
+        {% else %}
+            <div class="results-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon info-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <h3 class="card-title">Target Position</h3>
+                    </div>
+                    <div class="card-content">
+                        <h2 style="color: #2d3748; margin-bottom: 15px;">{{ target_job }}</h2>
+                        <p><strong>Required Skills:</strong></p>
+                        <div style="margin-top: 10px;">
+                            {% for skill in required %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 class="card-title">Your Strengths</h3>
+                    </div>
+                    <div class="card-content">
+                        {% if matched %}
+                            <p style="margin-bottom: 15px;"><strong>Skills You Already Have:</strong></p>
+                            {% for skill in matched %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="--progress: {{ (matched|length / required|length * 100)|round }}%;"></div>
+                            </div>
+                            <p style="margin-top: 10px; text-align: center; color: #28a745; font-weight: 600;">
+                                {{ (matched|length / required|length * 100)|round }}% Complete
+                            </p>
+                        {% else %}
+                            <p style="color: #6c757d; font-style: italic;">No matching skills found. This is a great opportunity to start your learning journey!</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon warning-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3 class="card-title">Skills to Learn</h3>
+                    </div>
+                    <div class="card-content">
+                        {% if missing %}
+                            <p style="margin-bottom: 15px;"><strong>Focus Areas:</strong></p>
+                            {% for skill in missing %}
+                                <span class="skill-tag missing-skill">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: #28a745; font-weight: 600;"><i class="fas fa-trophy"></i> Congratulations! You have all required skills!</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon time-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="card-title">Learning Timeline</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="time-summary">
+                            <div class="time-number">{{ total_days }}</div>
+                            <p>Days to Complete</p>
+                            <p style="font-size: 0.9rem; opacity: 0.9;">Based on {{ hours_per_day }} hours/day</p>
+                        </div>
+                        {% if skill_hours %}
+                            <ul class="skill-hours-list">
+                                {% for skill, hours in skill_hours.items() %}
+                                    <li>
+                                        <span><i class="fas fa-code"></i> {{ skill }}</span>
+                                        <span class="hours-badge {% if not hours %}unknown-hours{% endif %}">
+                                            {% if hours %}{{ hours }} hours{% else %}Unknown{% endif %}
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            
+
+            {% if foundation_courses %}
+            <div class="card full-width-card">
+                <div class="card-header">
+                    <div class="card-icon info-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="card-title">Foundation Courses</h3>
+                </div>
+                <div class="card-content">
+                    <ul class="course-list">
+                        {% for course in foundation_courses %}
+                        <li class="course-item">
+                            <a href="{{ course.link }}" target="_blank" class="course-title">
+                                <i class="fas fa-external-link-alt"></i> {{ course.title }}
+                            </a>
+                            <div class="course-meta">
+                                <i class="fas fa-building"></i> {{ course.provider }} • 
+                                <i class="fas fa-certificate"></i> {{ course.credential }} • 
+                                <i class="fas fa-clock"></i> {{ course.duration }}
+                                <span class="rating"><i class="fas fa-star"></i> {{ course.rating }}</span>
+                            </div>
+                            <div class="course-skills">
+                                <i class="fas fa-tools"></i> Covers: {{ course.covered_skills | join(", ") }}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if professional_courses %}
+            <div class="card full-width-card">
+                <div class="card-header">
+                    <div class="card-icon success-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <h3 class="card-title">Recommended Professional Courses</h3>
+                </div>
+                <div class="card-content">
+                    <ul class="course-list">
+                        {% for course in professional_courses %}
+                        <li class="course-item">
+                            <a href="{{ course.link }}" target="_blank" class="course-title">
+                                <i class="fas fa-external-link-alt"></i> {{ course.title }}
+                            </a>
+                            <div class="course-meta">
+                                <i class="fas fa-building"></i> {{ course.provider }} • 
+                                <i class="fas fa-certificate"></i> {{ course.credential }} • 
+                                <i class="fas fa-clock"></i> {{ course.duration }}
+                            </div>
+                            <div class="course-skills">
+                                <i class="fas fa-tools"></i> Covers: {{ course.covered_skills | join(", ") }}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <div style="text-align: center;">
+                <a href="/" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Analyze Another Position
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add staggered animation delays to skill tags
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillTags = document.querySelectorAll('.skill-tag');
+            skillTags.forEach((tag, index) => {
+                tag.style.animationDelay = (index * 0.1) + 's';
+            });
+
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Animate numbers counting up
+            const timeNumber = document.querySelector('.time-number');
+            if (timeNumber) {
+                const finalNumber = parseFloat(timeNumber.textContent);
+                let currentNumber = 0;
+                const increment = finalNumber / 50;
+                const timer = setInterval(() => {
+                    currentNumber += increment;
+                    if (currentNumber >= finalNumber) {
+                        currentNumber = finalNumber;
+                        clearInterval(timer);
+                    }
+                    timeNumber.textContent = currentNumber.toFixed(1);
+                }, 40);
+            }
+
+            // Add click ripple effect
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+                circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+                circle.classList.add('ripple');
+
+                const ripple = button.getElementsByClassName('ripple')[0];
+                if (ripple) {
+                    ripple.remove();
+                }
+
+                button.appendChild(circle);
+            }
+
+            const backButton = document.querySelector('.back-button');
+            if (backButton) {
+                backButton.addEventListener('click', createRipple);
+            }
+
+            // Add ripple CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                .ripple {
+                    position: absolute;
+                    border-radius: 50%;
+                    background-color: rgba(255, 255, 255, 0.6);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                }
+
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
